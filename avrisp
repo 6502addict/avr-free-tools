@@ -1,0 +1,2 @@
+#!/bin/bash
+avrdude -c avrispmkii -p $1 -P usb -B 10 -U flash:w:$2:i

@@ -1,0 +1,2 @@
+#!/bin/bash
+avrdude -c avrispmkii -p $1 -P usb -U lfuse:r:-:h -U hfuse:r:-:h -U efuse:r:-:h
