@@ -2,16 +2,20 @@
 
 contains my 6502 libraries ported to avr
 
-## *timer*   implement my timer library on 6502 for an avr by using an avr timer to implement the functions
-          but with exactly the same interface...
+## timer
+implement my timer library on 6502 for an avr by using an avr timer to implement the functions
+but with exactly the same interface...
 
-## *spi*               implement my spi library for 6502 for an avr by using the avr master spi to implement the functions
-                    but with exactly the same interface...
+## spi   
+implement my spi library for 6502 for an avr by using the avr master spi to implement the functions
+but with exactly the same interface...
 
-## *sdcard*            is the exact code used on the 6502 it depends only on the spi and timer libraries
+## sdcard
+is the exact code used on the 6502 it depends only on the spi and timer libraries
 
-## *fatfs*             is the standard fatfs library without any modification
-                    diskio.c is adapted to use my sdcard library
+## fatfs
+is the standard fatfs library without any modification
+diskio.c is adapted to use my sdcard library
 
 # Template
 
