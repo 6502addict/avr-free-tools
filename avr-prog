@@ -1,0 +1,186 @@
+#!/bin/bash
+# avr-prog - Unified AVR programmer script
+# Supports: AVR ISP mkII, JTAG ICE mkII, STK500, Atmel-ICE
+# Usage: ./avr-prog <programmer> <mode> <device> [options]
+
+show_usage() {
+    echo "AVR Unified Programmer Script"
+    echo "=============================="
+    echo ""
+    echo "Usage: $0 <programmer> <mode> <device> [options]"
+    echo ""
+    echo "Programmers:"
+    echo "  avrisp      - AVR ISP mkII"
+    echo "  jtagice     - JTAG ICE mkII"
+    echo "  stk500      - STK500"
+    echo "  atmelice    - Atmel-ICE"
+    echo ""
+    echo "Common Modes:"
+    echo "  program <device> <hexfile>           - Program flash"
+    echo "  erase <device>                       - Erase chip"
+    echo "  readfuse <device>                    - Read fuses"
+    echo "  writefuse <device> <l> <h> <e>       - Write fuses"
+    echo "  verify <device> <hexfile>            - Verify flash"
+    echo ""
+    echo "STK500 High Voltage Modes:"
+    echo "  hvsp <device> <hexfile>              - Program via HVSP (ATtiny)"
+    echo "  hvsp-erase <device>                  - Erase via HVSP (unbrick)"
+    echo "  hvpp <device> <hexfile>              - Program via HVPP (ATmega)"
+    echo "  hvpp-erase <device>                  - Erase via HVPP (unbrick)"
+    echo ""
+    echo "Atmel-ICE Special Modes:"
+    echo "  jtag <device> <hexfile>              - Program via JTAG"
+    echo "  debugwire <device> <hexfile>         - Program via debugWIRE"
+    echo "  pdi <device> <hexfile>               - Program via PDI (XMEGA)"
+    echo "  updi <device> <hexfile>              - Program via UPDI"
+    echo ""
+    echo "Examples:"
+    echo "  $0 avrisp program m328p firmware.hex"
+    echo "  $0 jtagice erase t85"
+    echo "  $0 stk500 readfuse m2560"
+    echo "  $0 stk500 hvsp-erase t85             # Unbrick ATtiny"
+    echo "  $0 atmelice updi avr128da28 fw.hex   # New AVR"
+    echo ""
+    exit 1
+}
+
+# Configuration
+STK500_PORT="/dev/ttyUSB0"  # Change if needed
+
+if [ $# -lt 3 ]; then
+    show_usage
+fi
+
+PROGRAMMER=$1
+MODE=$2
+DEVICE=$3
+
+# Determine avrdude programmer string and port
+case $PROGRAMMER in
+    avrisp)
+        AVRDUDE_PROG="avrispmkii"
+        AVRDUDE_PORT="usb"
+        AVRDUDE_OPTS="-B 10"
+        ;;
+    jtagice)
+        case $MODE in
+            program|erase|readfuse|writefuse|verify)
+                AVRDUDE_PROG="jtag2isp"
+                ;;
+            *)
+                AVRDUDE_PROG="jtag2isp"
+                ;;
+        esac
+        AVRDUDE_PORT="usb"
+        AVRDUDE_OPTS="-B 10"
+        ;;
+    stk500)
+        case $MODE in
+            hvsp|hvsp-erase)
+                AVRDUDE_PROG="stk500hvsp"
+                ;;
+            hvpp|hvpp-erase)
+                AVRDUDE_PROG="stk500pp"
+                ;;
+            *)
+                AVRDUDE_PROG="stk500v2"
+                AVRDUDE_OPTS="-B 10"
+                ;;
+        esac
+        AVRDUDE_PORT="$STK500_PORT"
+        ;;
+    atmelice)
+        case $MODE in
+            program|erase|readfuse|writefuse|verify)
+                AVRDUDE_PROG="atmelice_isp"
+                AVRDUDE_OPTS="-B 10"
+                ;;
+            jtag)
+                AVRDUDE_PROG="atmelice"
+                ;;
+            debugwire)
+                AVRDUDE_PROG="atmelice_dw"
+                ;;
+            pdi)
+                AVRDUDE_PROG="atmelice_pdi"
+                ;;
+            updi)
+                AVRDUDE_PROG="atmelice_updi"
+                ;;
+            *)
+                AVRDUDE_PROG="atmelice_isp"
+                AVRDUDE_OPTS="-B 10"
+                ;;
+        esac
+        AVRDUDE_PORT="usb"
+        ;;
+    *)
+        echo "Error: Unknown programmer '$PROGRAMMER'"
+        show_usage
+        ;;
+esac
+
+# Execute command based on mode
+case $MODE in
+    program|jtag|debugwire|pdi|updi|hvsp|hvpp)
+        HEXFILE=$4
+        if [ -z "$HEXFILE" ]; then
+            echo "Error: hexfile required for $MODE mode"
+            show_usage
+        fi
+        echo "Programming $DEVICE with $HEXFILE using $PROGRAMMER ($MODE mode)..."
+        avrdude -c $AVRDUDE_PROG -p $DEVICE -P $AVRDUDE_PORT $AVRDUDE_OPTS -U flash:w:$HEXFILE:i
+        ;;
+    
+    erase|hvsp-erase|hvpp-erase)
+        if [[ "$MODE" == "hvsp-erase" ]] || [[ "$MODE" == "hvpp-erase" ]]; then
+            echo "Erasing $DEVICE using HIGH VOLTAGE mode..."
+            echo "This will reset fuses to factory defaults!"
+            read -p "Continue? (yes/no): " CONFIRM
+            if [ "$CONFIRM" != "yes" ]; then
+                echo "Aborted."
+                exit 1
+            fi
+        else
+            echo "Erasing $DEVICE..."
+        fi
+        avrdude -c $AVRDUDE_PROG -p $DEVICE -P $AVRDUDE_PORT $AVRDUDE_OPTS -e
+        ;;
+    
+    readfuse)
+        echo "Reading fuses from $DEVICE..."
+        avrdude -c $AVRDUDE_PROG -p $DEVICE -P $AVRDUDE_PORT $AVRDUDE_OPTS -U lfuse:r:-:h -U hfuse:r:-:h -U efuse:r:-:h
+        ;;
+    
+    writefuse)
+        LFUSE=$4
+        HFUSE=$5
+        EFUSE=$6
+        if [ -z "$LFUSE" ] || [ -z "$HFUSE" ] || [ -z "$EFUSE" ]; then
+            echo "Error: All three fuse values required (lfuse hfuse efuse)"
+            show_usage
+        fi
+        echo "Writing fuses to $DEVICE: L=$LFUSE H=$HFUSE E=$EFUSE"
+        read -p "Are you sure? This can brick the chip! (yes/no): " CONFIRM
+        if [ "$CONFIRM" != "yes" ]; then
+            echo "Aborted."
+            exit 1
+        fi
+        avrdude -c $AVRDUDE_PROG -p $DEVICE -P $AVRDUDE_PORT $AVRDUDE_OPTS -U lfuse:w:$LFUSE:m -U hfuse:w:$HFUSE:m -U efuse:w:$EFUSE:m
+        ;;
+    
+    verify)
+        HEXFILE=$4
+        if [ -z "$HEXFILE" ]; then
+            echo "Error: hexfile required"
+            show_usage
+        fi
+        echo "Verifying $DEVICE against $HEXFILE..."
+        avrdude -c $AVRDUDE_PROG -p $DEVICE -P $AVRDUDE_PORT $AVRDUDE_OPTS -U flash:v:$HEXFILE:i
+        ;;
+    
+    *)
+        echo "Error: Unknown mode '$MODE'"
+        show_usage
+        ;;
+esac
