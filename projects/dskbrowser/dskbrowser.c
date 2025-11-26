@@ -1,6 +1,6 @@
 /*
  * Flex Disk Image Explorer - AVR Port
- * Supports ATmega328P/1284P/2560
+ * Supports ATmega1284P/ATmega2560
  */
 
 #include <stdio.h>
@@ -9,8 +9,15 @@
 #include <stdlib.h>
 #include <avr/io.h>
 #include <util/delay.h>
-#include "uart_console.h"  /* Add this include */
+#include <uart-mega.h> 
 #include "ff.h"
+
+
+#if defined(__AVR_ATmega1284P__) | defined(__AVR_ATmega2560__)
+#define ENDLINE '\r'
+#else 
+#define ENDLINE '\n'
+#endif
 
 /* FLEX constants from your flexdisk.h */
 #define FLEX_SIR_TRACK    0
@@ -418,7 +425,7 @@ int show_file_menu(void) {
     printf("\nSelect file (0-%d): ", file_count);
     
     scanf("%d", &choice);
-    while (getchar() != '\n'); /* consume rest of line */
+    while (getchar() != ENDLINE); /* consume rest of line */
     
     if (choice < 0 || choice > file_count) {
         return -1;
@@ -444,7 +451,7 @@ void block_browser(const char* filename) {
     while (1) {
         printf("\n[Block %d/%d] Command (n/p/g/q): ", current_block, max_blocks - 1);
         command = getchar();
-        while (getchar() != '\n'); /* consume rest of line */
+        while (getchar() != ENDLINE); /* consume rest of line */
         
         switch (command) {
             case 'n':
@@ -539,7 +546,7 @@ void disk_operations_menu(int file_index) {
         printf("\nChoice (1-3): ");
         
         command = getchar();
-        while (getchar() != '\n'); /* consume rest of line */
+        while (getchar() != ENDLINE); /* consume rest of line */
         
         switch (command) {
             case '1':
@@ -578,7 +585,8 @@ int main(void) {
     int file_index;
     
     /* Initialize UART console */
-    console_init();
+    uart_init(BAUD);
+    uart_console(BAUD);
     /* Small delay for serial monitor to connect */
     _delay_ms(1000);
 
@@ -586,9 +594,7 @@ int main(void) {
     printf("FLEX Disk Image Explorer AVR\n");
     printf("============================\n");
     printf("MCU: ");
-#if defined(__AVR_ATmega328P__)
-    printf("ATmega328P");
-#elif defined(__AVR_ATmega1284P__)
+#if defined(__AVR_ATmega1284P__)
     printf("ATmega1284P");
 #elif defined(__AVR_ATmega2560__)
     printf("ATmega2560");
@@ -596,7 +602,7 @@ int main(void) {
     printf("Unknown");
 #endif
     printf(" @ %luHz\n", F_CPU);
-    printf("UART: %ld baud\n\n", BAUD);
+    printf("UART: %ld baud\n\n", (long int)  BAUD);
 
     /* Mount filesystem */
     res = f_mount(&fs, "", 1);

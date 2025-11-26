@@ -27,9 +27,13 @@ typedef enum {
   ST_READY
 } sd_init_state_t;
 
- uint8_t sdcard_type;
+uint8_t sdcard_type;
 
- uint8_t sd_crc7_byte(uint8_t crc, uint8_t data) {
+uint8_t sd_type() {
+  return sdcard_type;
+}
+
+uint8_t sd_crc7_byte(uint8_t crc, uint8_t data) {
   uint8_t i;
   
   for (i = 0; i < 8; i++) {

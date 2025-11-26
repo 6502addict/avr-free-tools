@@ -1,0 +1,13 @@
+```
+
+**ATtiny85 Pinout:**
+```
+      ┌─────┐
+RESET─┤1   8├─VCC (+5V)
+     ─┤2   7├─
+INPUT─┤3   6├─OUTPUT (decoded bit)
+GND  ─┤4   5├─
+      └─────┐
+
+Pin 3 (PB3) = FSK input (1200/2400Hz)
+Pin 6 (PB0) = Data output (0/1)

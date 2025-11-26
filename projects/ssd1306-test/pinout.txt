@@ -1,0 +1,9 @@
+```
+
+**Connections for Arduino Uno:**
+```
+SSD1306 OLED -> Arduino Uno
+VCC          -> 5V (or 3.3V if your display is 3.3V only)
+GND          -> GND
+SCL          -> A5 (PC5)
+SDA          -> A4 (PC4)

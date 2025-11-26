@@ -1,0 +1,15 @@
+```
+
+**ATtiny85 Pinout:**
+```
+      ┌─────┐
+RESET─┤1   8├─VCC (+5V)
+     ─┤2   7├─
+INPUT─┤3   6├─FREQ OUT (1200/2400 Hz)
+GND  ─┤4   5├─
+      └─────┐
+
+Pin 3 (PB3) = Digital input
+Pin 6 (PB1/OC1A) = Frequency output
+
+

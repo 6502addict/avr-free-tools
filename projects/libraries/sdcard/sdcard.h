@@ -95,6 +95,7 @@ uint8_t     sd_cmd(uint8_t, uint8_t, uint8_t, uint8_t, uint8_t);
 uint8_t     sd_read(unsigned long, uint8_t *);
 uint8_t     sd_write(unsigned long , uint8_t *);
 uint8_t     sd_init(void);
+uint8_t     sd_type(void);
 const char* sd_error_string(uint8_t);
 
 

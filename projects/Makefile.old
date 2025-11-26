@@ -1,0 +1,33 @@
+# Top-level Makefile for AVR libraries
+
+SUBDIRS = libraries ds1302-test dskbrowser font-transform-test ili948x-test joystick-test mcp41xxx-test mega-freqgen mega-ne567 ssd1306-test ssd1680-test \
+	  tiny-blink tiny-ne555 tiny-calibrate tiny-freqgen  mega-ne567 tiny-fsk-mod tiny-fsk-demod wheel-test
+
+.PHONY: all install install-all clean all-mcus $(SUBDIRS)
+
+all:
+	@for dir in $(SUBDIRS); do \
+		$(MAKE) -C $$dir all || exit 1; \
+	done
+
+install:
+	@for dir in $(SUBDIRS); do \
+		$(MAKE) -C $$dir install || exit 1; \
+	done
+
+install-all:
+	@for dir in $(SUBDIRS); do \
+		$(MAKE) -C $$dir install-all || exit 1; \
+	done
+
+clean:
+	@for dir in $(SUBDIRS); do \
+		$(MAKE) -C $$dir clean || exit 1; \
+	done
+
+all-mcus:
+	@for dir in $(SUBDIRS); do \
+		$(MAKE) -C $$dir all-mcus || exit 1; \
+	done
+
+

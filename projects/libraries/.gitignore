@@ -1,0 +1,10 @@
+*~
+*.o
+*.a
+*.elf
+*.hex
+*.map
+build			
+bme280
+mmea-parser
+rf433

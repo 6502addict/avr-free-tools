@@ -1,4 +1,9 @@
 # FatFs Library Makefile for AVR
+include ../../common.mk
+
+PROJECT_ROOT = $(abspath ../../..)
+LIB_DIR = $(PROJECT_ROOT)/lib
+INCLUDE_DIR = $(PROJECT_ROOT)/include
 
 # MCU settings - change this to build for different targets
 MCU ?= atmega328p
@@ -16,9 +21,9 @@ CFLAGS += -Wno-unused-parameter -Wno-sign-compare
 
 # Directories
 BUILD_DIR = build
-INSTALL_PREFIX = $(HOME)/avr/template
-INCLUDE_DIR = $(INSTALL_PREFIX)/include
-LIB_DIR = $(INSTALL_PREFIX)/lib
+#INSTALL_PREFIX = $(HOME)/avr
+#INCLUDE_DIR = $(INSTALL_PREFIX)/include
+#LIB_DIR = $(INSTALL_PREFIX)/lib
 
 # Source files
 SRC = ff.c diskio.c

@@ -1,0 +1,8 @@
+**Connections for Arduino Uno:**
+```
+Rotary Encoder -> Arduino
+A (CLK)        -> D8  (PB0)
+B (DT)         -> D9  (PB1)
+Button (SW)    -> D10 (PB2)
++              -> 5V
+GND            -> GND

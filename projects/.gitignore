@@ -1,0 +1,12 @@
+
+*~
+*.o
+*.a
+*.elf
+*.hex
+*.map
+not-tested
+bme280-test
+ds1302-bridge
+gps-test
+

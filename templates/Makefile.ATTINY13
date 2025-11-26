@@ -1,0 +1,19 @@
+MCU = attiny13
+F_CPU = 9600000UL  # 9.6MHz (or 1.2MHz default)
+CC = avr-gcc
+OBJCOPY = avr-objcopy
+SIZE = avr-size
+
+CFLAGS = -Wall -Os -mmcu=$(MCU) -DF_CPU=$(F_CPU)
+CFLAGS += -ffunction-sections -fdata-sections -Wl,--gc-sections
+
+program.hex: program.elf
+	$(OBJCOPY) -O ihex $< $@
+	$(SIZE) --mcu=$(MCU) --format=avr program.elf
+
+program.elf: main.c
+	$(CC) $(CFLAGS) -o $@ $
+
+flash: program.hex
+	avrdude -c usbasp -p t13 -U flash:w:$
+

@@ -5,7 +5,7 @@
 #include <stdbool.h>
 #include <ctype.h>
 #include <ds1302.h>
-#include "uart_console.h"
+#include <uart-mega.h>
 
 #define DS1302_ON  0
 #define DS1302_OFF 1
@@ -272,6 +272,7 @@ static void process_command(char *cmd) {
     printf("  set time HH:MM:SS    - Set time\r\n");
     printf("  get date             - Get date\r\n");
     printf("  get time             - Get time\r\n");
+    printf("  protect on|off       - Set write protect on or off\r\n");    
     printf("  stop                 - Stop the clock\r\n");
     printf("  start                - Start the clock\r\n");
     printf("  status               - Show clock status\r\n");
@@ -285,7 +286,9 @@ int main(void) {
   char buffer[64];
   uint8_t buf_idx = 0;
   
-  console_init();
+  uart_init(BAUD);
+  uart_set_echo(0);
+  uart_console();
   ds1302_init();
   
   printf("\r\nDS1302 RTC Test v1.2\r\n");
